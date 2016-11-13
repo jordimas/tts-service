@@ -1,8 +1,8 @@
 server {
 
         # See http://www.nginxtips.com/nginx-location-directive/
-        listen 8010 default_server;
-        listen [::]:8010 default_server ipv6only=on;
+        listen 8100 default_server;
+        listen [::]:8100 default_server ipv6only=on;
 
         ssi on;
         root /home/jmas/web/tts-service/;
@@ -14,7 +14,6 @@ server {
             rewrite ^ / break;
             proxy_pass http://127.0.0.1:8010;
         }
-	
 }
 
 
