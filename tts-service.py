@@ -25,7 +25,7 @@ import subprocess
 app = Flask(__name__)
 
 
-@app.route('/api/voice/', methods=['GET'])
+@app.route('/speak/', methods=['GET'])
 def voice_api():
     text = request.args.get('text')
     
