@@ -18,9 +18,10 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-from flask import Flask, request, Response
+from flask import Flask, request
 from flask import send_file
 import subprocess
+import tempfile
 
 app = Flask(__name__)
 
@@ -28,22 +29,36 @@ app = Flask(__name__)
 @app.route('/speak/', methods=['GET'])
 def voice_api():
     text = request.args.get('text')
-    
-    f = open('voice.txt','w', encoding='utf8')
-    f.write(text)
-    f.close()
+    iconv = '/usr/bin/iconv'
+    txt2wave = '/usr/bin/text2wave'
+    lame = '/usr/bin/lame'
 
-    p = subprocess.Popen('/usr/bin/iconv -f utf8 -t ISO-8859-15//TRANSLIT voice.txt > voice.8859',shell=True, stdout=subprocess.PIPE)
-    p.wait()
+    with tempfile.NamedTemporaryFile() as text_file,\
+         tempfile.NamedTemporaryFile() as encoded_file,\
+         tempfile.NamedTemporaryFile() as wave_file,\
+         tempfile.NamedTemporaryFile() as mp3_file:
 
-    p = subprocess.Popen('/usr/bin/text2wave -o text.wav voice.8859 -eval cfg.txt',shell=True, stdout=subprocess.PIPE)
-    p.wait()   
+        f = open(text_file.name, 'w', encoding='utf8')
+        f.write(text)
+        f.close()
 
-    p = subprocess.Popen('/usr/bin/lame text.wav text.mp3',shell=True, stdout=subprocess.PIPE)
-    p.wait()
+        cmd = '{0} -f utf8 -t ISO-8859-15//TRANSLIT {1} > {2}'.\
+              format(iconv, text_file.name, encoded_file.name)
+        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+        p.wait()
 
- 
-    return send_file('text.mp3', mimetype="audio/mp3", as_attachment=False, attachment_filename="text.mp3") 
+        cmd = '{0} -o {1} {2} -eval cfg.txt'.\
+              format(txt2wave, wave_file.name, encoded_file.name)
+        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+        p.wait()
+
+        cmd = '{0} {1} {2}'.\
+              format(lame, wave_file.name, mp3_file.name)
+        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+        p.wait()
+
+        return send_file(mp3_file.name, mimetype="audio/mp3",
+                        as_attachment=False, attachment_filename=mp3_file.name)
 
 if __name__ == '__main__':
     app.debug = True
