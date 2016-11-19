@@ -39,7 +39,7 @@ def voice_api():
     text = request.args.get('text')
     token = request.args.get('token')
 
-    if getMD5(text) != token.lower():
+    if token is None or getMD5(text) != token.lower():
         return ("Forbidden", 403)
 
     iconv = '/usr/bin/iconv'
