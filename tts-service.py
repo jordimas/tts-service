@@ -22,13 +22,26 @@ from flask import Flask, request
 from flask import send_file
 import subprocess
 import tempfile
+import hashlib
 
 app = Flask(__name__)
+
+
+def getMD5(text):
+    m = hashlib.md5()
+    m.update(text.encode('utf-8'))
+    s = m.hexdigest()[:8].lower()
+    return s
 
 
 @app.route('/speak/', methods=['GET'])
 def voice_api():
     text = request.args.get('text')
+    token = request.args.get('token')
+
+    if getMD5(text) != token.lower():
+        return ("Forbidden", 403)
+
     iconv = '/usr/bin/iconv'
     txt2wave = '/usr/bin/text2wave'
     lame = '/usr/bin/lame'
