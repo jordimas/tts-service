@@ -18,11 +18,14 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-from flask import Flask, request
-from flask import send_file
+from flask import Flask, request, Response, send_file
 import subprocess
 import tempfile
 import hashlib
+import datetime
+import os
+import json
+from usage import Usage
 
 app = Flask(__name__)
 
@@ -70,8 +73,27 @@ def voice_api():
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         p.wait()
 
+        usage = Usage()
+        usage.log()
         return send_file(mp3_file.name, mimetype="audio/mp3",
                         as_attachment=False, attachment_filename=mp3_file.name)
+
+@app.route('/stats/', methods=['GET'])
+def stats():
+    requested = request.args.get('date')
+    date_requested = datetime.datetime.strptime(requested, '%Y-%m-%d')
+    usage = Usage()
+    calls = usage.get_stats(date_requested)
+
+    result = {}
+    result['calls'] = calls
+    return json_answer(json.dumps(result, indent=4, separators=(',', ': ')))
+
+def json_answer(data):
+    resp = Response(data, mimetype='application/json')
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
+
 
 if __name__ == '__main__':
     app.debug = True
