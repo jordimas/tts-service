@@ -33,21 +33,27 @@ class Usage(object):
     DAYS_TO_KEEP = 7
 
     def log(self):
-        with open(self.FILE, "a") as file_out:
-            current_time = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-            file_out.write('{0}\n'.format(current_time))
+        try:
+            with open(self.FILE, "a") as file_out:
+                current_time = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+                file_out.write('{0}\n'.format(current_time))
+        except:
+            pass
 
     def get_stats(self, date_requested):
         count = 0
-        with open(self.FILE, "r") as file_in:
-            for line in file_in:
-                datetime_no_newline = line[:len(line)-1]
-                line_datetime = datetime.datetime.strptime(datetime_no_newline, '%Y-%m-%d %H:%M:%S')
-                if line_datetime.date() == date_requested.date():
-                    count = count + 1
+        try:
+            with open(self.FILE, "r") as file_in:
+                for line in file_in:
+                    datetime_no_newline = line[:len(line)-1]
+                    line_datetime = datetime.datetime.strptime(datetime_no_newline, '%Y-%m-%d %H:%M:%S')
+                    if line_datetime.date() == date_requested.date():
+                        count = count + 1
 
-        if self._is_old_line(self._read_first_line()):
-            self._rotate_file()
+            if self._is_old_line(self._read_first_line()):
+                self._rotate_file()
+        except:
+            pass
 
         return str(count)
 
