@@ -32,15 +32,22 @@ class Usage(object):
     FILE = "usage.txt"
     DAYS_TO_KEEP = 7
 
+    def __init__(self):
+        self.rotate = True
+
+    def _get_time_now(self):
+        return datetime.datetime.utcnow()
+
     def log(self):
         try:
             with open(self.FILE, "a+") as file_out:
-                current_time = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+                current_time = self._get_time_now().strftime('%Y-%m-%d %H:%M:%S')
                 file_out.write('{0}\n'.format(current_time))
 
-            if self._is_old_line(self._read_first_line()):
+            if self.rotate and self._is_old_line(self._read_first_line()):
                 self._rotate_file()
-        except:
+        except Exception as exception:
+            print("Error:" + str(exception))
             pass
 
     def get_stats(self, date_requested):
@@ -71,7 +78,7 @@ class Usage(object):
 
         line = line[:len(line)-1]
         line_datetime = datetime.datetime.strptime(line, '%Y-%m-%d %H:%M:%S')
-        return line_datetime < datetime.datetime.now() - datetime.timedelta(days = self.DAYS_TO_KEEP)
+        return line_datetime < self._get_time_now() - datetime.timedelta(days = self.DAYS_TO_KEEP)
 
     def _rotate_file(self):
         TEMP = "usage.bak"
@@ -80,7 +87,5 @@ class Usage(object):
         with open(TEMP, "r") as temp:
             with open(self.FILE, "w") as new:
                 for line in temp:
-                    if self.is_old_line(line) is False:
+                    if self._is_old_line(line) is False:
                         new.write(line)
-
-        os.remove(TEMP)
