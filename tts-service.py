@@ -78,7 +78,7 @@ def voice_api():
         return send_file(mp3_file.name, mimetype="audio/mp3",
                         as_attachment=False, attachment_filename=mp3_file.name)
 
-@app.route('/stats/', methods=['GET'])
+@app.route('/speak/stats/', methods=['GET'])
 def stats():
     requested = request.args.get('date')
     date_requested = datetime.datetime.strptime(requested, '%Y-%m-%d')
