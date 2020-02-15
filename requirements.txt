@@ -1,2 +1,0 @@
-# Requirements
--r requirements/prod.txt
