@@ -1,5 +1,6 @@
 FROM python:3.7.6-slim-buster
-RUN apt-get update && apt-get install git -y
+RUN apt-get update && apt-get -y upgrade
+RUN apt-get -y install festival festvox-ca-ona-hts lame
 
 ENV PORT 8100
 
