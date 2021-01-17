@@ -43,7 +43,7 @@ def voice_api():
     token = request.args.get('token')
     file_type = request.args.get('type')
 
-    if file_type not in ("wav", "mp3", None):
+    if file_type not in ("wav", "x-wav", "mp3", None):
         return ("Bad Request", 400)
 
     if token is None or getMD5(text) != token.lower():
@@ -72,8 +72,8 @@ def voice_api():
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         p.wait()
 
-        if (file_type == "wav"):
-            return send_file(wave_file.name, mimetype="audio/x-wav",
+        if file_type in ("wav", "x-wav"):
+            return send_file(wave_file.name, mimetype="audio/" + str(file_type),
                              as_attachment=False, attachment_filename=wave_file.name)
 
         cmd = '{0} {1} {2}'.\
