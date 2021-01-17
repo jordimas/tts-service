@@ -41,6 +41,10 @@ def getMD5(text):
 def voice_api():
     text = request.args.get('text')
     token = request.args.get('token')
+    file_type = request.args.get('type')
+
+    if file_type not in ("wav", "mp3", None):
+        return ("Bad Request", 400)
 
     if token is None or getMD5(text) != token.lower():
         return ("Forbidden", 403)
@@ -67,6 +71,10 @@ def voice_api():
               format(txt2wave, wave_file.name, encoded_file.name)
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         p.wait()
+
+        if (file_type == "wav"):
+            return send_file(wave_file.name, mimetype="audio/wav",
+                             as_attachment=False, attachment_filename=wave_file.name)
 
         cmd = '{0} {1} {2}'.\
               format(lame, wave_file.name, mp3_file.name)
