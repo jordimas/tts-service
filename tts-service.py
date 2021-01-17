@@ -73,7 +73,7 @@ def voice_api():
         p.wait()
 
         if (file_type == "wav"):
-            return send_file(wave_file.name, mimetype="audio/wav",
+            return send_file(wave_file.name, mimetype="audio/x-wav",
                              as_attachment=False, attachment_filename=wave_file.name)
 
         cmd = '{0} {1} {2}'.\
