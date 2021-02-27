@@ -45,7 +45,6 @@ def voice_api():
     if token is None or getMD5(text) != token.lower():
         return ("Forbidden", 403)
 
-    iconv = '/usr/bin/iconv'
     txt2wave = '/usr/bin/text2wave'
     lame = '/usr/bin/lame'
 
@@ -53,8 +52,8 @@ def voice_api():
          tempfile.NamedTemporaryFile() as wave_file,\
          tempfile.NamedTemporaryFile() as mp3_file:
 
-        f = open(encoded_file.name, 'w', encoding='ISO-8859-15')
-        f.write(text)
+        f = open(encoded_file.name, 'wb')
+        f.write(text.encode('ISO-8859-15'))
         f.close()
 
         cmd = '{0} -o {1} {2} -eval cfg.txt'.\
