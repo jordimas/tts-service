@@ -49,26 +49,20 @@ def voice_api():
     txt2wave = '/usr/bin/text2wave'
     lame = '/usr/bin/lame'
 
-    with tempfile.NamedTemporaryFile() as text_file,\
-         tempfile.NamedTemporaryFile() as encoded_file,\
+    with tempfile.NamedTemporaryFile() as encoded_file,\
          tempfile.NamedTemporaryFile() as wave_file,\
          tempfile.NamedTemporaryFile() as mp3_file:
 
-        f = open(text_file.name, 'w', encoding='utf8')
+        f = open(encoded_file.name, 'w', encoding='ISO-8859-15')
         f.write(text)
         f.close()
-
-        cmd = '{0} -f utf8 -t ISO-8859-15//TRANSLIT {1} > {2}'.\
-              format(iconv, text_file.name, encoded_file.name)
-        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-        p.wait()
 
         cmd = '{0} -o {1} {2} -eval cfg.txt'.\
               format(txt2wave, wave_file.name, encoded_file.name)
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         p.wait()
 
-        cmd = '{0} {1} {2}'.\
+        cmd = '{0} -f {1} {2}'.\
               format(lame, wave_file.name, mp3_file.name)
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         p.wait()
