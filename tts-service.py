@@ -36,6 +36,22 @@ def getMD5(text):
     s = m.hexdigest()[:8].lower()
     return s
 
+def _normalize(result):
+    mapping = {
+                '’' : '\'',
+                'à' : 'à',
+                'í' : 'í',
+                'ó' : 'ó',
+                'è' : 'è',
+                'ò' : 'ò',
+                'ú' : 'ú',
+              }
+
+    for char in mapping.keys():
+        result = result.replace(char, mapping[char])
+
+    return result
+
 
 @app.route('/speak/', methods=['GET'])
 def voice_api():
@@ -52,8 +68,9 @@ def voice_api():
          tempfile.NamedTemporaryFile() as wave_file,\
          tempfile.NamedTemporaryFile() as mp3_file:
 
+        text = _normalize(text)
         f = open(encoded_file.name, 'wb')
-        f.write(text.encode('ISO-8859-15'))
+        f.write(text.encode('ISO-8859-15', 'ignore'))
         f.close()
 
         cmd = '{0} -o {1} {2} -eval cfg.txt'.\
