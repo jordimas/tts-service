@@ -30,6 +30,11 @@ from usage import Usage
 app = Flask(__name__)
 
 
+festival_voices = {
+    "ona": "voice_upc_ca_ona_hts",
+    "pau": "voice_upc_ca_pau_hts"
+}
+
 def getMD5(text):
     m = hashlib.md5()
     m.update(text.encode('utf-8'))
@@ -57,6 +62,11 @@ def _normalize(result):
 def voice_api():
     text = request.args.get('text')
     token = request.args.get('token')
+    voice = request.args.get('voice') or "ona"
+
+    if voice not in ["ona", "pau"]:
+        return ("Bad Request", 400)
+
 
     if token is None or getMD5(text) != token.lower():
         return ("Forbidden", 403)
@@ -73,8 +83,8 @@ def voice_api():
         f.write(text.encode('ISO-8859-15', 'ignore'))
         f.close()
 
-        cmd = '{0} -o {1} {2} -eval cfg.txt'.\
-              format(txt2wave, wave_file.name, encoded_file.name)
+        cmd = '{0} -o {1} {2} -eval "({3})"'.\
+              format(txt2wave, wave_file.name, encoded_file.name, festival_voices[voice])
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         p.wait()
 
