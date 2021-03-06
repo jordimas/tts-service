@@ -1,3 +1,0 @@
-(set! default-voices (list 'upc_ca_ona_hts))
-(language_catalan)
-
